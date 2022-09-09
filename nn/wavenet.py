@@ -39,7 +39,7 @@ import math
 import random
 import time
 from collections import deque
-from . import debug
+import debug
 
 import numpy as np
 import torch.nn.functional as F
