@@ -1,0 +1,6 @@
+librosa==0.7.2
+matplotlib==3.5.2
+numpy==1.21.6
+pretty_midi==0.2.9
+scipy==1.7.3
+torch==1.12.1
