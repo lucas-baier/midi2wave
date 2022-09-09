@@ -289,7 +289,7 @@ class Wavenet(torch.nn.Module):
 
         # debug.plot_tensor(forward_input, "test/" + self.name + "/raw_input")
         
-        forward_input = self.in_layer(forward_input)
+        forward_input = self.in_layer(forward_input).cuda()
 
         # debug.plot_tensor(forward_input, "test/" + self.name + "/input_transform")
 
