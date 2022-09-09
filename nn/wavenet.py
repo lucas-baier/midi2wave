@@ -39,7 +39,7 @@ import math
 import random
 import time
 from collections import deque
-#import debug
+from . import debug
 
 import numpy as np
 import torch.nn.functional as F
@@ -80,7 +80,7 @@ class Conv(torch.nn.Module):
     def forward(self, signal):
         if self.is_causal:
             padding = (int((self.kernel_size - 1) * (self.dilation)), 0)
-            signal = torch.nn.functional.pad(signal, padding) 
+            signal = torch.nn.functional.pad(signal, padding).cuda()
         signal = self.conv(signal)
         if self.use_act:
             signal = self.act(signal)

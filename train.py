@@ -69,10 +69,6 @@ class CrossEntropyLoss(torch.nn.Module):
             input = batch * samples by num_classes
             targets = batch * samples
         """
-        print("Inputs Shape:")
-        print(inputs.shape)
-        print("Targets Shape:")
-        print(targets.shape)
         targets = targets.view(-1)
         inputs = inputs.transpose(1, 2)
         inputs = inputs.contiguous()
@@ -97,7 +93,6 @@ class L2DiversityLoss(torch.nn.Module):
     def forward(self, q_bar):
         """
         Notes on how this works:
-
         q_bar is the continous autoencoder output distribution averaged across batch and time
         Each q is normalized so sum(q)=1
         Let k be the dimensionality of q
@@ -152,9 +147,9 @@ def train(num_gpus, rank, group_name, device, output_directory, epochs, learning
 
     if num_gpus > 1:
         device = init_distributed(rank, num_gpus, group_name, **dist_config)
-    # device = torch.device(device)
+    device = torch.device(device)
     torch.manual_seed(seed)
-    # torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
         
     if use_logistic_mixtures:
         sampler = DML.SampleDiscretizedMixLogistics()
@@ -164,7 +159,7 @@ def train(num_gpus, rank, group_name, device, output_directory, epochs, learning
         criterion = CrossEntropyLoss()
 
     if use_wavenet_autoencoder:
-        model = WavenetAutoencoder(wavenet_config, cond_wavenet_config, use_variational_autoencoder)#.to(device)
+        model = WavenetAutoencoder(wavenet_config, cond_wavenet_config, use_variational_autoencoder).to(device)
         if use_variational_autoencoder:
             diversity_loss = L2DiversityLoss()
     else:
@@ -314,16 +309,16 @@ if __name__ == "__main__":
     global cond_wavenet_config
     cond_wavenet_config = config["cond_wavenet_config"]
     
-    # num_gpus = torch.cuda.device_count()
-    # if num_gpus > 1:
-    #     if args.group_name == '':
-    #         print("WARNING: Multiple GPUs detected but no distributed group set")
-    #         print("Only running 1 GPU.  Use distributed.py for multiple GPUs")
-    #         num_gpus = 1
+    num_gpus = torch.cuda.device_count()
+    if num_gpus > 1:
+        if args.group_name == '':
+            print("WARNING: Multiple GPUs detected but no distributed group set")
+            print("Only running 1 GPU.  Use distributed.py for multiple GPUs")
+            num_gpus = 1
     
-    if 0 == 1 and args.rank != 0:
+    if num_gpus == 1 and args.rank != 0:
         raise Exception("Doing single GPU training on rank > 0")
     
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.benchmark = False
-    train(0, args.rank, args.group_name, **train_config)
+    train(num_gpus, args.rank, args.group_name, **train_config)
